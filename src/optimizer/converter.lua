@@ -33,10 +33,6 @@ local function get_real(exp)
     return str
 end
 
-local function get_available_name(name)
-    return name
-end
-
 local function get_string(exp)
     return ('"%s"'):format(exp.value:gsub('\r\n', '\\n'):gsub('[\r\n]', '\\n'))
 end
@@ -49,24 +45,24 @@ local function get_boolean(exp)
     end
 end
 
-local function get_var_name(name)
-    return get_available_name(name)
+local function get_var_name(var)
+    return var.confused or var.name
 end
 
 local function get_var(exp)
-    return get_var_name(exp.name)
+    return get_var_name(exp)
 end
 
 local function get_vari(exp)
-    return ('%s[%s]'):format(get_var_name(exp.name), get_exp(exp[1]))
+    return ('%s[%s]'):format(get_var_name(exp), get_exp(exp[1]))
 end
 
-local function get_function_name(name)
-    return get_available_name(name)
+local function get_function_name(func)
+    return func.confused or func.name
 end
 
-local function get_takes_name(name)
-    return get_available_name(name)
+local function get_takes_name(arg)
+    return arg.confused or arg.name
 end
 
 local function get_call(exp)
@@ -74,7 +70,7 @@ local function get_call(exp)
     for i, sub_exp in ipairs(exp) do
         args[i] = get_exp(sub_exp)
     end
-    return ('%s(%s)'):format(get_function_name(exp.name), table.concat(args, ','))
+    return ('%s(%s)'):format(get_function_name(exp), table.concat(args, ','))
 end
 
 local function get_add(exp)
@@ -150,7 +146,7 @@ local function get_not(exp)
 end
 
 local function get_code(exp)
-    return ('function %s'):format(get_function_name(exp.name))
+    return ('function %s'):format(get_function_name(exp))
 end
 
 local priority = {
@@ -262,13 +258,13 @@ local function add_global(global)
         return
     end
     if global.array then
-        insert_line(([[%s array %s]]):format(global.type, get_var_name(global.name)))
+        insert_line(([[%s array %s]]):format(global.type, get_var_name(global)))
     else
         local value = get_exp(global[1])
         if value then
-            insert_line(([[%s %s=%s]]):format(global.type, get_var_name(global.name), value))
+            insert_line(([[%s %s=%s]]):format(global.type, get_var_name(global), value))
         else
-            insert_line(([[%s %s]]):format(global.type, get_var_name(global.name)))
+            insert_line(([[%s %s]]):format(global.type, get_var_name(global)))
         end
     end
 end
@@ -287,13 +283,13 @@ local function add_local(loc)
         return
     end
     if loc.array then
-        insert_line(('local %s array %s'):format(loc.type, get_var_name(loc.name)))
+        insert_line(('local %s array %s'):format(loc.type, get_var_name(loc)))
     else
         local value = get_exp(loc[1])
         if value then
-            insert_line(('local %s %s=%s'):format(loc.type, get_var_name(loc.name), value))
+            insert_line(('local %s %s=%s'):format(loc.type, get_var_name(loc), value))
         else
-            insert_line(('local %s %s'):format(loc.type, get_var_name(loc.name)))
+            insert_line(('local %s %s'):format(loc.type, get_var_name(loc)))
         end
     end
 end
@@ -316,15 +312,15 @@ local function get_args(line)
 end
 
 local function add_call(line)
-    insert_line(('call %s(%s)'):format(get_function_name(line.name), get_args(line)))
+    insert_line(('call %s(%s)'):format(get_function_name(line), get_args(line)))
 end
 
 local function add_set(line)
-    insert_line(('set %s=%s'):format(get_var_name(line.name), get_exp(line[1])))
+    insert_line(('set %s=%s'):format(get_var_name(line), get_exp(line[1])))
 end
 
 local function add_seti(line)
-    insert_line(('set %s[%s]=%s'):format(get_var_name(line.name), get_exp(line[1]), get_exp(line[2])))
+    insert_line(('set %s[%s]=%s'):format(get_var_name(line), get_exp(line[1]), get_exp(line[2])))
 end
 
 local function add_return(line)
@@ -403,7 +399,7 @@ local function get_takes(func)
     end
     local takes = {}
     for i, arg in ipairs(func.args) do
-        takes[i] = ('%s %s'):format(arg.type, get_takes_name(arg.name))
+        takes[i] = ('%s %s'):format(arg.type, get_takes_name(arg))
     end
     return table.concat(takes, ',')
 end
@@ -422,7 +418,7 @@ local function add_native(func)
         return
     end
     current_function = func
-    insert_line(([[native %s takes %s returns %s]]):format(get_function_name(func.name), get_takes(func), get_returns(func)))
+    insert_line(([[native %s takes %s returns %s]]):format(get_function_name(func), get_takes(func), get_returns(func)))
 end
 
 local function add_function(func)
@@ -431,7 +427,7 @@ local function add_function(func)
         return
     end
     current_function = func
-    insert_line(([[function %s takes %s returns %s]]):format(get_function_name(func.name), get_takes(func), get_returns(func)))
+    insert_line(([[function %s takes %s returns %s]]):format(get_function_name(func), get_takes(func), get_returns(func)))
     add_locals(func.locals)
     add_lines(func)
     insert_line('endfunction')

@@ -51,24 +51,16 @@ local function get_var(name)
     end
 end
 
-local function mark_var(name)
-    if current_function then
-        local locals = current_function.locals
-        if locals then
-            for i = #locals, 1, -1 do
-                local loc = locals[i]
-                if loc.name == name and loc.line < current_line then
-                    loc.used = true
-                    return
-                end
-            end
-        end
-        local args = current_function.args
-        if args and args[name] then
-            return
-        end
+local function mark_var(var)
+    local use_var, type = get_var(var.name)
+    if type == 'global' and use_var.file ~= 'war3map.j' then
+        return
     end
-    jass.globals[name].used = true
+    use_var.used = true
+    if confuse then
+        var.confused = confuse(var.name)
+        use_var.confused = confuse(var.name)
+    end
 end
 
 function mark_exp(exp)
@@ -77,9 +69,9 @@ function mark_exp(exp)
     end
     if exp.type == 'null' or exp.type == 'integer' or exp.type == 'real' or exp.type == 'string' or exp.type == 'boolean' then
     elseif exp.type == 'var' or exp.type == 'vari' then
-        mark_var(exp.name)
+        mark_var(exp)
     elseif exp.type == 'call' or exp.type == 'code' then
-        mark_function(exp.name)
+        mark_function(exp)
     end
     for i = 1, #exp do
         mark_exp(exp[i])
@@ -91,6 +83,9 @@ local function mark_locals(locals)
         if loc[1] then
             current_line = loc.line
             loc.used = true
+            if confuse then
+                loc.confused = confuse(loc.name)
+            end
             mark_exp(loc[1])
         end
     end
@@ -103,7 +98,7 @@ local function mark_execute(line)
     local exp = line[1]
     if exp.type == 'string' then
         if get_function(exp.value) then
-            mark_function(exp.value)
+            mark_function(get_function(exp.value))
         end
         return
     end
@@ -122,7 +117,7 @@ local function mark_execute(line)
 end
 
 local function mark_call(line)
-    mark_function(line.name)
+    mark_function(line)
     for _, exp in ipairs(line) do
         mark_exp(exp)
     end
@@ -132,12 +127,12 @@ local function mark_call(line)
 end
 
 local function mark_set(line)
-    mark_var(line.name)
+    mark_var(line)
     mark_exp(line[1])
 end
 
 local function mark_seti(line)
-    mark_var(line.name)
+    mark_var(line)
     mark_exp(line[1])
     mark_exp(line[2])
 end
@@ -203,18 +198,35 @@ function mark_lines(lines)
     end
 end
 
-function mark_function(name)
-    local func = get_function(name)
+local function mark_takes(args)
+    if not args then
+        return
+    end
+    for _, arg in ipairs(args) do
+        if confuse then
+            arg.confused = confuse(arg.name)
+        end
+    end
+end
+
+function mark_function(call)
+    local func = get_function(call.name)
+    if func.native then
+        func.used = true
+        return
+    end
+    if confuse and func.file == 'war3map.j' then
+        call.confused = confuse(func.name)
+        func.confused = confuse(func.name)
+    end
     if func.used or func.file ~= 'war3map.j' then
         return
     end
     func.used = true
-    if func.native then
-        return
-    end
     local _current_function = current_function
     local _current_line     = current_line
     current_function = func
+    mark_takes(func.args)
     mark_locals(func.locals)
     mark_lines(func)
     current_function = _current_function
@@ -226,6 +238,9 @@ local function mark_globals()
         if global[1] then
             current_line = global.line
             global.used = true
+            if confuse then
+                global.confused = confuse(global.name)
+            end
             mark_exp(global[1])
         end
     end
@@ -239,11 +254,11 @@ local function mark_executed()
         if not func.used then
             local name = func.name
             if executed_any then
-                mark_function(name)
+                mark_function(func)
             else
                 for head in pairs(executes) do
                     if name:sub(1, #head) == head then
-                        mark_function(name)
+                        mark_function(func)
                         break
                     end
                 end
@@ -264,7 +279,23 @@ local function init_confuser(confusion)
     end
 
     function confuse:can_use(name)
-
+        local func = get_function(name)
+        if func then
+            if func.file ~= 'war3map.j' then
+                return false
+            end
+            return true
+        end
+        local var, type = get_var(name)
+        if type == 'global' then
+            if var.file ~= 'war3map.j' then
+                return false
+            end
+            return true
+        elseif type == 'arg' or type == 'local' then
+            return true
+        end
+        return true
     end
 end
 
@@ -274,7 +305,7 @@ return function (ast, config, _report)
 
     init_confuser(config.confusion)
     mark_globals()
-    mark_function('config')
-    mark_function('main')
+    mark_function(get_function 'config')
+    mark_function(get_function 'main')
     mark_executed()
 end

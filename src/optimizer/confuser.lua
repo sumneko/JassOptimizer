@@ -43,7 +43,7 @@ function mt:__call(name)
     if not self.name_list[name] then
         while true do
             local new_name = find_new_name(self)
-            if not self.can_use or self:can_use(new_name) then
+            if not key_list[new_name] and (not self.can_use or self:can_use(new_name)) then
                 self.name_list[name] = new_name
                 break
             end
