@@ -27,8 +27,13 @@ local function main()
             ast, grms = parser(jass,     'war3map.j',  ast)
         end, error_handle)
 
-        local buf = optimizer(ast)
+        local buf, report = optimizer(ast)
         io.save(root / 'optimized.j', buf)
+        for _, msgs in pairs(report) do
+            for _, msg in ipairs(msgs) do
+                print(msg[1], msg[2])
+            end
+        end
     else
         
     end
