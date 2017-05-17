@@ -49,13 +49,6 @@ local function get_boolean(exp)
     end
 end
 
-local function is_arg(name)
-    if not current_function or not current_function.args then
-        return false
-    end
-    return current_function.args[name]
-end
-
 local function get_var_name(name)
     return get_available_name(name)
 end
@@ -69,6 +62,10 @@ local function get_vari(exp)
 end
 
 local function get_function_name(name)
+    return get_available_name(name)
+end
+
+local function get_takes_name(name)
     return get_available_name(name)
 end
 
@@ -265,13 +262,13 @@ local function add_global(global)
         return
     end
     if global.array then
-        insert_line(([[%s array %s]]):format(global.type, get_available_name(global.name)))
+        insert_line(([[%s array %s]]):format(global.type, get_var_name(global.name)))
     else
         local value = get_exp(global[1])
         if value then
-            insert_line(([[%s %s=%s]]):format(global.type, get_available_name(global.name), value))
+            insert_line(([[%s %s=%s]]):format(global.type, get_var_name(global.name), value))
         else
-            insert_line(([[%s %s]]):format(global.type, get_available_name(global.name)))
+            insert_line(([[%s %s]]):format(global.type, get_var_name(global.name)))
         end
     end
 end
@@ -406,7 +403,7 @@ local function get_takes(func)
     end
     local takes = {}
     for i, arg in ipairs(func.args) do
-        takes[i] = ('%s %s'):format(arg.type, get_available_name(arg.name))
+        takes[i] = ('%s %s'):format(arg.type, get_takes_name(arg.name))
     end
     return table.concat(takes, ',')
 end
@@ -454,7 +451,7 @@ return function (ast, _report)
     lines = {}
     jass = ast
     report = _report
-
+    
     add_globals()
     add_functions()
 

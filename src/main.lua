@@ -27,7 +27,10 @@ local function main()
             ast, grms = parser(jass,     'war3map.j',  ast)
         end, error_handle)
 
-        local buf, report = optimizer(ast)
+        config = {}
+        config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
+
+        local buf, report = optimizer(ast, config)
         io.save(root / 'optimized.j', buf)
         for _, msgs in pairs(report) do
             for _, msg in ipairs(msgs) do
@@ -37,7 +40,7 @@ local function main()
     else
         
     end
-    print('完成')
+    print('完成', os.clock())
 end
 
 main()

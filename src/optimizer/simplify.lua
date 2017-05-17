@@ -1,10 +1,55 @@
+local confuser = require 'optimizer.confuser'
+
 local ipairs = ipairs
 local pairs = pairs
 
-local jass, report
+local jass, report, confuse
 local current_function, current_line
 local executes, executed_any
 local mark_exp, mark_lines, mark_function
+
+local function get_function(name)
+    return jass.functions[name]
+end
+
+local function get_arg(name)
+    if current_function and current_function.args then
+        return current_function.args[name]
+    end
+end
+
+local function get_local(name)
+    if current_function then
+        local locals = current_function.locals
+        if locals then
+            for i = #locals, 1, -1 do
+                local loc = locals[i]
+                if loc.name == name and loc.line < current_line then
+                    return loc
+                end
+            end
+        end
+    end
+end
+
+local function get_global(name)
+    return jass.globals[name]
+end
+
+local function get_var(name)
+    local var = get_local(name)
+    if var then
+        return var, 'local'
+    end
+    local var = get_arg(name)
+    if var then
+        return var, 'arg'
+    end
+    local var = get_global(name)
+    if var then
+        return var, 'global'
+    end
+end
 
 local function mark_var(name)
     if current_function then
@@ -57,7 +102,7 @@ local function mark_execute(line)
     end
     local exp = line[1]
     if exp.type == 'string' then
-        if jass.functions[exp.value] then
+        if get_function(exp.value) then
             mark_function(exp.value)
         end
         return
@@ -159,7 +204,7 @@ function mark_lines(lines)
 end
 
 function mark_function(name)
-    local func = jass.functions[name]
+    local func = get_function(name)
     if func.used or func.file ~= 'war3map.j' then
         return
     end
@@ -207,9 +252,27 @@ local function mark_executed()
     end
 end
 
-return function (ast, _report)
+local function init_confuser(confusion)
+    if not confusion then
+        return
+    end
+    local err
+    confuse, err = confuser(confusion)
+    if not confuse then
+        report('脚本混淆失败', '脚本混淆失败', err)
+        return
+    end
+
+    function confuse:can_use(name)
+
+    end
+end
+
+return function (ast, config, _report)
     jass = ast
     report = _report
+
+    init_confuser(config.confusion)
     mark_globals()
     mark_function('config')
     mark_function('main')
