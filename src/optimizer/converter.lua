@@ -286,7 +286,7 @@ end
 
 local function add_local(loc)
     if not loc.used then
-        report('清除未引用的局部变量', ('清除未引用的局部变量 %s'):format(loc.name), ('函数[%s]内，第[%d]行'):format(current_function.name, loc.line))
+        report('清除未引用的局部变量', ('清除未引用的局部变量 %s'):format(loc.name), ('第[%d]行，函数[%s]内'):format(loc.line, current_function.name))
         return
     end
     if loc.array then
