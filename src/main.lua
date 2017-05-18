@@ -32,9 +32,9 @@ local function main()
 
         local buf, report = optimizer(ast, config)
         io.save(root / 'optimized.j', buf)
-        for _, msgs in pairs(report) do
+        for type, msgs in pairs(report) do
             for _, msg in ipairs(msgs) do
-                print(msg[1], msg[2])
+                print(type, msg[1], msg[2])
             end
         end
     else
