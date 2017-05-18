@@ -1,9 +1,3 @@
-local keys = {'globals', 'endglobals', 'constant', 'native', 'array', 'and', 'or', 'not', 'type', 'extends', 'function', 'endfunction', 'nothing', 'takes', 'returns', 'call', 'set', 'return', 'if', 'endif', 'elseif', 'else', 'loop', 'endloop', 'exitwhen'}
-local key_list = {}
-for _, key in ipairs(keys) do
-    key_list[key] = true
-end
-
 local mt = {}
 mt.__index = mt
 
@@ -42,14 +36,12 @@ end
 local function find_usable_name(self)
     while true do
         local new_name = find_new_name(self)
-        if not key_list[new_name] then
-            if not self.on_find then
-                return new_name
-            end
-            local new_name = self:on_find(new_name)
-            if new_name then
-                return new_name
-            end
+        if not self.on_find then
+            return new_name
+        end
+        local new_name = self:on_find(new_name)
+        if new_name then
+            return new_name
         end
     end
 end

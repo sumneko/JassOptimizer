@@ -297,7 +297,15 @@ local function mark_executed()
     end
 end
 
+local cant_use = {'globals', 'endglobals', 'constant', 'native', 'array', 'and', 'or', 'not', 'type', 'extends', 'function', 'endfunction', 'nothing', 'takes', 'returns', 'call', 'set', 'return', 'if', 'endif', 'elseif', 'else', 'loop', 'endloop', 'exitwhen', 'main', 'config'}
+for _, name in ipairs(cant_use) do
+    cant_use[name] = true
+end
+
 local function can_use(name)
+    if cant_use[name] then
+        return false
+    end
     local func = get_function(name)
     if func then
         if func.file ~= 'war3map.j' then
