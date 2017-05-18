@@ -43,10 +43,10 @@ local function find_usable_name(self)
     while true do
         local new_name = find_new_name(self)
         if not key_list[new_name] then
-            if not self.on_use then
+            if not self.on_find then
                 return new_name
             end
-            local new_name = self:on_use(new_name)
+            local new_name = self:on_find(new_name)
             if new_name then
                 return new_name
             end
@@ -68,7 +68,7 @@ return function (confusion)
     self.head_list = {}
     self.confuse_bytes = {}
     self.confuse_chars = {}
-    for char in confusion:gmatch '[%w_]' do
+    for char in confusion:gmatch '.' do
         self.char_list[#self.char_list+1] = char
     end
     return self

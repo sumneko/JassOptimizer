@@ -318,7 +318,15 @@ local function init_confuser(confusion)
     if not confusion then
         return
     end
+
     local chars = {}
+    for char in confusion:gmatch '[%w_]' do
+        if not chars[char] then
+            chars[#chars+1] = char
+        end
+    end
+    confusion = table.concat(chars)
+
     for char in confusion:gmatch '%a' do
         chars[#chars+1] = char
     end
@@ -329,7 +337,7 @@ local function init_confuser(confusion)
 
     local confuse_head = chars[1]
     confuse1 = confuser(confusion:gsub(confuse_head, ''))
-    function confuse1:on_use(name)
+    function confuse1:on_find(name)
         if can_use(name) then
             return name
         else
@@ -339,7 +347,7 @@ local function init_confuser(confusion)
 
     jass.confused_head = {}
     confuse2 = confuser(confusion)
-    function confuse2:on_use(name)
+    function confuse2:on_find(name)
         name = confuse_head .. name
         if can_use(name) then
             return name
