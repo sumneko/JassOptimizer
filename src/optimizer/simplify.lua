@@ -115,6 +115,9 @@ local function mark_execute(line)
     if not executed_any then
         executed_any = true
         report('强制引用全部函数', '强制引用全部函数', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
+        if confuse1 then
+            report('没有混淆函数名', '没有混淆函数名', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
+        end
     end
 end
 
