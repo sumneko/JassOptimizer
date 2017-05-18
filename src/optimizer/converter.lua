@@ -355,7 +355,8 @@ local function get_args(line)
 end
 
 local function add_executefunc(line)
-    if #line == 1 and line[1].type == 'string' then
+    local exp = line[1]
+    if exp.type == 'string' then
         local func = get_function(line[1].value)
         if not func then
             return false
@@ -363,7 +364,18 @@ local function add_executefunc(line)
         insert_line(('call ExecuteFunc("%s")'):format(get_confused_name(func)))
         return true
     end
-    return false
+    if not jass.confused_head then
+        return false
+    end
+    if exp.type ~= '+' or exp[1].type ~= 'string' then
+        return false
+    end
+    local confused = jass.confused_head[exp[1].value]
+    if not confused then
+        return false
+    end
+    insert_line(('call ExecuteFunc("%s"+%s)'):format(confused, get_exp(exp[2])))
+    return true
 end
 
 local function add_call(line)

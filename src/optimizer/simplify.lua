@@ -3,7 +3,7 @@ local confuser = require 'optimizer.confuser'
 local ipairs = ipairs
 local pairs = pairs
 
-local jass, report, confuse
+local jass, report, confuse1, confuse2
 local current_function, current_line, has_call
 local executes, executed_any
 local mark_exp, mark_lines, mark_function
@@ -57,8 +57,8 @@ local function mark_var(var)
         return
     end
     use_var.used = true
-    if confuse then
-        use_var.confused = confuse(var.name)
+    if confuse1 then
+        use_var.confused = confuse1(var.name)
     end
 end
 
@@ -85,8 +85,8 @@ local function mark_locals(locals)
             mark_exp(loc[1])
             if has_call then
                 loc.used = true
-                if confuse then
-                    loc.confused = confuse(loc.name)
+                if confuse1 then
+                    loc.confused = confuse1(loc.name)
                 end
             end
         end
@@ -206,8 +206,8 @@ local function mark_takes(args)
         return
     end
     for _, arg in ipairs(args) do
-        if confuse then
-            arg.confused = confuse(arg.name)
+        if confuse1 then
+            arg.confused = confuse1(arg.name)
         end
     end
 end
@@ -240,8 +240,8 @@ local function mark_globals()
             mark_exp(global[1])
             if has_call then
                 global.used = true
-                if confuse then
-                    global.confused = confuse(global.name)
+                if confuse1 then
+                    global.confused = confuse1(global.name)
                 end
             end
         end
@@ -272,10 +272,12 @@ local function mark_executed_confuse(func)
     end
     for head in pairs(executes) do
         if name:sub(1, #head) == head then
+            func.confused = confuse2(head) .. name:sub(#head+1)
+            jass.confused_head[head] = confuse2(head)
             return
         end
     end
-    func.confused = confuse(name)
+    func.confused = confuse1(name)
 end
 
 local function mark_executed()
@@ -285,42 +287,65 @@ local function mark_executed()
     for _, func in ipairs(jass.functions) do
         mark_executed_used(func)
     end
-    if not executed_any and confuse then
+    if not executed_any and confuse1 then
         for _, func in ipairs(jass.functions) do
             mark_executed_confuse(func)
         end
     end
 end
 
+local function can_use(name)
+    local func = get_function(name)
+    if func then
+        if func.file ~= 'war3map.j' then
+            return false
+        end
+        return true
+    end
+    local var, type = get_var(name)
+    if type == 'global' then
+        if var.file ~= 'war3map.j' then
+            return false
+        end
+        return true
+    elseif type == 'arg' or type == 'local' then
+        return true
+    end
+    return true
+end
+
 local function init_confuser(confusion)
     if not confusion then
         return
     end
-    local err
-    confuse, err = confuser(confusion)
-    if not confuse then
-        report('脚本混淆失败', '脚本混淆失败', err)
+    local chars = {}
+    for char in confusion:gmatch '%a' do
+        chars[#chars+1] = char
+    end
+    if #chars < 2 then
+        report('脚本混淆失败', '脚本混淆失败', '至少要有2个字母')
         return
     end
 
-    function confuse:can_use(name)
-        local func = get_function(name)
-        if func then
-            if func.file ~= 'war3map.j' then
-                return false
-            end
-            return true
+    local confuse_head = chars[1]
+    confuse1 = confuser(confusion:gsub(confuse_head, ''))
+    function confuse1:on_use(name)
+        if can_use(name) then
+            return name
+        else
+            return nil
         end
-        local var, type = get_var(name)
-        if type == 'global' then
-            if var.file ~= 'war3map.j' then
-                return false
-            end
-            return true
-        elseif type == 'arg' or type == 'local' then
-            return true
+    end
+
+    jass.confused_head = {}
+    confuse2 = confuser(confusion)
+    function confuse2:on_use(name)
+        name = confuse_head .. name
+        if can_use(name) then
+            return name
+        else
+            return nil
         end
-        return true
     end
 end
 
