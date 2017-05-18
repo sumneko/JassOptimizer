@@ -28,7 +28,7 @@ local function find_char(self, current, is_head, is_tail)
     return nil
 end
 
-function find_new_name(self)
+local function find_new_name(self)
     for i = 1, #self.confuse_bytes + 1 do
         local byte, char = find_char(self, self.confuse_bytes[i], i >= #self.confuse_bytes, i == 1)
         if byte then
@@ -42,15 +42,25 @@ function find_new_name(self)
     return string.reverse(table.concat(self.confuse_chars))
 end
 
+local function find_usable_name(self)
+    while true do
+        local new_name = find_new_name(self)
+        if not key_list[new_name] and (not self.can_use or self:can_use(new_name)) then
+            return new_name
+        end
+    end
+end
+
+function mt:head(name)
+    if not self.head_list[name] then
+        self.head_list[name] = self.confuse_head .. find_usable_name(self)
+    end
+    return self.head_list[name]
+end
+
 function mt:__call(name)
     if not self.name_list[name] then
-        while true do
-            local new_name = find_new_name(self)
-            if not key_list[new_name] and (not self.can_use or self:can_use(new_name)) then
-                self.name_list[name] = new_name
-                break
-            end
-        end
+        self.name_list[name] = find_usable_name(self)
     end
     return self.name_list[name]
 end
@@ -69,6 +79,7 @@ return function (confusion)
     local self = setmetatable({}, mt)
     self.char_list = {}
     self.name_list = {}
+    self.head_list = {}
     self.confuse_bytes = {}
     self.confuse_chars = {}
     for char in confusion:gmatch '[%w_]' do
