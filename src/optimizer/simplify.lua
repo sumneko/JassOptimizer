@@ -4,7 +4,7 @@ local ipairs = ipairs
 local pairs = pairs
 
 local jass, report, confuse
-local current_function, current_line
+local current_function, current_line, has_call
 local executes, executed_any
 local mark_exp, mark_lines, mark_function
 
@@ -81,11 +81,14 @@ local function mark_locals(locals)
     for _, loc in ipairs(locals) do
         if loc[1] then
             current_line = loc.line
-            loc.used = true
-            if confuse then
-                loc.confused = confuse(loc.name)
-            end
+            has_call = false
             mark_exp(loc[1])
+            if has_call then
+                loc.used = true
+                if confuse then
+                    loc.confused = confuse(loc.name)
+                end
+            end
         end
     end
 end
@@ -116,6 +119,7 @@ local function mark_execute(line)
 end
 
 local function mark_call(line)
+    has_call = true
     mark_function(line)
     for _, exp in ipairs(line) do
         mark_exp(exp)
@@ -235,11 +239,14 @@ local function mark_globals()
     for _, global in ipairs(jass.globals) do
         if global[1] then
             current_line = global.line
-            global.used = true
-            if confuse then
-                global.confused = confuse(global.name)
-            end
+            has_call = false
             mark_exp(global[1])
+            if has_call then
+                global.used = true
+                if confuse then
+                    global.confused = confuse(global.name)
+                end
+            end
         end
     end
 end
