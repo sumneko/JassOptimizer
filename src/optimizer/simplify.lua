@@ -260,6 +260,7 @@ local function mark_executed()
             local name = func.name
             if executed_any then
                 mark_function(func)
+                func.confused = nil
             else
                 for head in pairs(executes) do
                     if name:sub(1, #head) == head then
