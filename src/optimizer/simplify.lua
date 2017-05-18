@@ -58,7 +58,6 @@ local function mark_var(var)
     end
     use_var.used = true
     if confuse then
-        var.confused = confuse(var.name)
         use_var.confused = confuse(var.name)
     end
 end
@@ -216,7 +215,6 @@ function mark_function(call)
         return
     end
     if confuse and func.file == 'war3map.j' then
-        call.confused = confuse(func.name)
         func.confused = confuse(func.name)
     end
     if func.used or func.file ~= 'war3map.j' then

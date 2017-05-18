@@ -45,24 +45,65 @@ local function get_boolean(exp)
     end
 end
 
-local function get_var_name(var)
-    return var.confused or var.name
+local function get_confused_name(obj)
+    return obj.confused or obj.name
 end
 
-local function get_var(exp)
-    return get_var_name(exp)
+local function get_function(name)
+    return jass.functions[name]
 end
 
-local function get_vari(exp)
+local function get_arg(name)
+    if current_function and current_function.args then
+        return current_function.args[name]
+    end
+end
+
+local function get_local(name)
+    if current_function then
+        local locals = current_function.locals
+        if locals then
+            for i = #locals, 1, -1 do
+                local loc = locals[i]
+                if loc.name == name and loc.line < current_line then
+                    return loc
+                end
+            end
+        end
+    end
+end
+
+local function get_global(name)
+    return jass.globals[name]
+end
+
+local function get_var(name)
+    local var = get_local(name)
+    if var then
+        return var, 'local'
+    end
+    local var = get_arg(name)
+    if var then
+        return var, 'arg'
+    end
+    local var = get_global(name)
+    if var then
+        return var, 'global'
+    end
+end
+
+local function get_var_name(exp)
+    local var = get_var(exp.name)
+    return get_confused_name(var)
+end
+
+local function get_vari_name(exp)
     return ('%s[%s]'):format(get_var_name(exp), get_exp(exp[1]))
 end
 
-local function get_function_name(func)
-    return func.confused or func.name
-end
-
-local function get_takes_name(arg)
-    return arg.confused or arg.name
+local function get_function_name(call)
+    local func = get_function(call.name)
+    return get_confused_name(func)
 end
 
 local function get_call(exp)
@@ -199,9 +240,9 @@ function get_exp(exp, op)
     elseif exp.type == 'boolean' then
         value = get_boolean(exp)
     elseif exp.type == 'var' then
-        value = get_var(exp)
+        value = get_var_name(exp)
     elseif exp.type == 'vari' then
-        value = get_vari(exp)
+        value = get_vari_name(exp)
     elseif exp.type == 'call' then
         value = get_call(exp)
     elseif exp.type == '+' then
@@ -257,14 +298,15 @@ local function add_global(global)
         report('清除未引用的全局变量', ('清除未引用的全局变量 %s'):format(global.name), ('第[%d]行'):format(global.line))
         return
     end
+    current_line = global.line
     if global.array then
-        insert_line(([[%s array %s]]):format(global.type, get_var_name(global)))
+        insert_line(([[%s array %s]]):format(global.type, get_confused_name(global)))
     else
         local value = get_exp(global[1])
         if value then
-            insert_line(([[%s %s=%s]]):format(global.type, get_var_name(global), value))
+            insert_line(([[%s %s=%s]]):format(global.type, get_confused_name(global), value))
         else
-            insert_line(([[%s %s]]):format(global.type, get_var_name(global)))
+            insert_line(([[%s %s]]):format(global.type, get_confused_name(global)))
         end
     end
 end
@@ -282,14 +324,15 @@ local function add_local(loc)
         report('清除未引用的局部变量', ('清除未引用的局部变量 %s'):format(loc.name), ('第[%d]行，函数[%s]内'):format(loc.line, current_function.name))
         return
     end
+    current_line = loc.line
     if loc.array then
-        insert_line(('local %s array %s'):format(loc.type, get_var_name(loc)))
+        insert_line(('local %s array %s'):format(loc.type, get_confused_name(loc)))
     else
         local value = get_exp(loc[1])
         if value then
-            insert_line(('local %s %s=%s'):format(loc.type, get_var_name(loc), value))
+            insert_line(('local %s %s=%s'):format(loc.type, get_confused_name(loc), value))
         else
-            insert_line(('local %s %s'):format(loc.type, get_var_name(loc)))
+            insert_line(('local %s %s'):format(loc.type, get_confused_name(loc)))
         end
     end
 end
@@ -373,6 +416,7 @@ end
 
 function add_lines(chunk)
     for i, line in ipairs(chunk) do
+        current_line = line.line
         if line.type == 'call' then
             add_call(line)
         elseif line.type == 'set' then
@@ -399,7 +443,7 @@ local function get_takes(func)
     end
     local takes = {}
     for i, arg in ipairs(func.args) do
-        takes[i] = ('%s %s'):format(arg.type, get_takes_name(arg))
+        takes[i] = ('%s %s'):format(arg.type, get_confused_name(arg))
     end
     return table.concat(takes, ',')
 end
@@ -418,7 +462,7 @@ local function add_native(func)
         return
     end
     current_function = func
-    insert_line(([[native %s takes %s returns %s]]):format(get_function_name(func), get_takes(func), get_returns(func)))
+    insert_line(([[native %s takes %s returns %s]]):format(get_confused_name(func), get_takes(func), get_returns(func)))
 end
 
 local function add_function(func)
@@ -427,7 +471,8 @@ local function add_function(func)
         return
     end
     current_function = func
-    insert_line(([[function %s takes %s returns %s]]):format(get_function_name(func), get_takes(func), get_returns(func)))
+    current_line = func.line
+    insert_line(([[function %s takes %s returns %s]]):format(get_confused_name(func), get_takes(func), get_returns(func)))
     add_locals(func.locals)
     add_lines(func)
     insert_line('endfunction')
