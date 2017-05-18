@@ -218,7 +218,7 @@ function mark_function(call)
         func.used = true
         return
     end
-    if confuse and func.file == 'war3map.j' then
+    if confuse and func.file == 'war3map.j' and func.name ~= 'config' and func.name ~= 'main' then
         func.confused = confuse(func.name)
     end
     if func.used or func.file ~= 'war3map.j' then
