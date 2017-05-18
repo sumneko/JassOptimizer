@@ -354,8 +354,24 @@ local function get_args(line)
     return table.concat(args, ',')
 end
 
+local function add_executefunc(line)
+    if #line == 1 and line[1].type == 'string' then
+        local func = get_function(line[1].value)
+        if not func then
+            return false
+        end
+        insert_line(('call ExecuteFunc("%s")'):format(get_confused_name(func)))
+        return true
+    end
+    return false
+end
+
 local function add_call(line)
-    insert_line(('call %s(%s)'):format(get_function_name(line), get_args(line)))
+    local name = get_function_name(line)
+    if name == 'ExecuteFunc' and add_executefunc(line) then
+        return
+    end
+    insert_line(('call %s(%s)'):format(name, get_args(line)))
 end
 
 local function add_set(line)
