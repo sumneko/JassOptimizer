@@ -218,9 +218,6 @@ function mark_function(call)
         func.used = true
         return
     end
-    if confuse and func.file == 'war3map.j' and func.name ~= 'config' and func.name ~= 'main' then
-        func.confused = confuse(func.name)
-    end
     if func.used or func.file ~= 'war3map.j' then
         return
     end
@@ -251,26 +248,46 @@ local function mark_globals()
     end
 end
 
+local function mark_executed_used(func)
+    if func.used then
+        return
+    end
+    if executed_any then
+        mark_function(func)
+        return
+    end
+    local name = func.name
+    for head in pairs(executes) do
+        if name:sub(1, #head) == head then
+            mark_function(func)
+            return
+        end
+    end
+end
+
+local function mark_executed_confuse(func)
+    local name = func.name
+    if name == 'config' or name == 'main' then
+        return
+    end
+    for head in pairs(executes) do
+        if name:sub(1, #head) == head then
+            return
+        end
+    end
+    func.confused = confuse(name)
+end
+
 local function mark_executed()
     if not executes then
         return
     end
     for _, func in ipairs(jass.functions) do
-        if not func.used then
-            local name = func.name
-            if executed_any then
-                mark_function(func)
-            else
-                for head in pairs(executes) do
-                    if name:sub(1, #head) == head then
-                        mark_function(func)
-                        break
-                    end
-                end
-            end
-        end
-        if executed_any then
-            func.confused = nil
+        mark_executed_used(func)
+    end
+    if not executed_any and confuse then
+        for _, func in ipairs(jass.functions) do
+            mark_executed_confuse(func)
         end
     end
 end
