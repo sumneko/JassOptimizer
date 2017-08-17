@@ -17,7 +17,7 @@ local function main()
         local common   = io.load(root / 'src' / 'jass' / 'common.j')
         local blizzard = io.load(root / 'src' / 'jass' / 'blizzard.j')
 
-        local path = fs.path(arg[1])
+        local path = fs.path(uni.a2u(arg[1]))
         local jass = io.load(path)
 
         local ast, grms
