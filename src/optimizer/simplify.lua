@@ -117,9 +117,9 @@ local function mark_execute(line)
     end
     if not executed_any then
         executed_any = true
-        report('强制引用全部函数', '强制引用全部函数', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
+        report('混淆脚本', '强制引用全部函数', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
         if confuse1 then
-            report('没有混淆函数名', '没有混淆函数名', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
+            report('混淆脚本', '没有混淆函数名', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
         end
     end
 end
@@ -128,7 +128,7 @@ local function check_confuse(line)
     if confuse1 then
         if not global_variable_any then
             global_variable_any = true
-            report('没有混淆全局变量名', '没有混淆全局变量名', ('第[%d]行：注册了实数变量变化事件'):format(line.line))
+            report('混淆脚本', '没有混淆全局变量名', ('第[%d]行：注册了实数变量变化事件'):format(line.line))
         end
     end
 end
@@ -367,7 +367,7 @@ local function init_confuser(confusion)
         end
     end
     if #chars < 3 then
-        report('脚本混淆失败', '脚本混淆失败', '至少要有3个合法字符')
+        report('混淆脚本', '脚本混淆失败', '至少要有3个合法字符')
     end
     
     confusion = table.concat(chars)
@@ -376,7 +376,7 @@ local function init_confuser(confusion)
         chars[#chars+1] = char
     end
     if #chars < 2 then
-        report('脚本混淆失败', '脚本混淆失败', '至少要有2个字母')
+        report('混淆脚本', '脚本混淆失败', '至少要有2个字母')
         return
     end
 
