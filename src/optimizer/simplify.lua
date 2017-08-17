@@ -5,7 +5,7 @@ local pairs = pairs
 
 local jass, report, confuse1, confuse2
 local current_function, current_line, has_call
-local executes, executed_any
+local executes, executed_any, global_variable_any
 local mark_exp, mark_lines, mark_function
 
 local function get_function(name)
@@ -124,6 +124,15 @@ local function mark_execute(line)
     end
 end
 
+local function check_confuse(line)
+    if confuse1 then
+        if not global_variable_any then
+            global_variable_any = true
+            report('没有混淆全局变量名', '没有混淆全局变量名', ('第[%d]行：注册了实数变量变化事件'):format(line.line))
+        end
+    end
+end
+
 local function mark_call(line)
     mark_function(line)
     for _, exp in ipairs(line) do
@@ -131,6 +140,9 @@ local function mark_call(line)
     end
     if line.name == 'ExecuteFunc' then
         mark_execute(line)
+    end
+    if line.name == 'TriggerRegisterVariableEvent' then
+        check_confuse(line)
     end
 end
 
@@ -253,6 +265,15 @@ local function mark_globals()
                 end
             end
         end
+    end
+end
+
+local function fix_globals()
+    if not global_variable_any then
+        return
+    end
+    for _, global in ipairs(jass.globals) do
+        global.confused = nil
     end
 end
 
@@ -390,4 +411,5 @@ return function (ast, config, _report)
     mark_function(get_function 'config')
     mark_function(get_function 'main')
     mark_executed()
+    fix_globals()
 end
