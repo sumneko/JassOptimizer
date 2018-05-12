@@ -1,4 +1,5 @@
 local confuser = require 'optimizer.confuser'
+local lang = require 'lang'
 
 local ipairs = ipairs
 local pairs = pairs
@@ -111,15 +112,15 @@ local function mark_execute(line)
         if exp[1].type == 'string' then
             local head = exp[1].value
             executes[head] = true
-            report('引用函数', ('%s...'):format(head), ('第[%d]行：ExecuteFunc("%s" + ...)'):format(line.line, head))
+            report(lang.report.REFERENCE_FUNCTION, ('%s...'):format(head), (lang.report.JASS_LINE .. 'ExecuteFunc("%s" + ...)'):format(line.line, head))
             return
         end
     end
     if not executed_any then
         executed_any = true
-        report('混淆脚本', '强制引用全部函数', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
+        report(lang.report.CONFUSE_JASS, lang.report.FORCE_REFERENCE_ALL, (lang.report.JASS_LINE .. lang.report.FULLY_DYNAMIC .. 'ExecuteFunc'):format(line.line))
         if confuse1 then
-            report('混淆脚本', '没有混淆函数名', ('第[%d]行：完全动态的ExecuteFunc'):format(line.line))
+            report(lang.report.CONFUSE_JASS, lang.report.NO_CONFUSING_FUNCTION_NAME, (lang.report.JASS_LINE .. lang.report.FULLY_DYNAMIC .. 'ExecuteFunc'):format(line.line))
         end
     end
 end
@@ -128,7 +129,7 @@ local function check_confuse(line)
     if confuse1 then
         if not global_variable_any then
             global_variable_any = true
-            report('混淆脚本', '没有混淆全局实数变量', ('第[%d]行：注册了实数变量变化事件'):format(line.line))
+            report(lang.report.CONFUSE_JASS, lang.report.NO_CONFUSING_GLOBAL_REAL, (lang.report.JASS_LINE .. lang.report.DEFINED_VARIABLE_EVENT):format(line.line))
         end
     end
 end
@@ -356,8 +357,8 @@ local function can_use(name)
     return true
 end
 
-local function init_confuser(confusion)
-    if not confusion then
+local function init_confuser(confused, confusion)
+    if not confused then
         return
     end
 
@@ -369,20 +370,21 @@ local function init_confuser(confusion)
         end
     end
     if #chars < 3 then
-        report('混淆脚本', '脚本混淆失败', '至少要有3个合法字符')
+        report(lang.report.CONFUSE_JASS, lang.report.CONFUSED_FAILED, lang.report.NEED_3_CHARS)
     end
     
     confusion = table.concat(chars)
 
-    for char in confusion:gmatch '%a' do
-        chars[#chars+1] = char
+    local count = 0
+    for _ in confusion:gmatch '%a' do
+        count = count + 1
     end
-    if #chars < 2 then
-        report('混淆脚本', '脚本混淆失败', '至少要有2个字母')
+    if count < 2 then
+        report(lang.report.CONFUSE_JASS, lang.report.CONFUSED_FAILED, lang.report.NEED_2_LETTERS)
         return
     end
 
-    local confuse_head = chars[1]
+    local confuse_head = confusion:match '%a'
     confuse1 = confuser(confusion:gsub(confuse_head, ''))
     function confuse1:on_find(name)
         if can_use(name) then
@@ -408,7 +410,7 @@ return function (ast, config, _report)
     jass = ast
     report = _report
 
-    init_confuser(config.confusion)
+    init_confuser(config.confused, config.confusion)
     mark_globals()
     mark_function(get_function 'config')
     mark_function(get_function 'main')
