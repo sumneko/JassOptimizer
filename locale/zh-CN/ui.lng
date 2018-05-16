@@ -32,10 +32,10 @@
 读取slk文件
 [READ_SLK_HINT]
 外部导入的slk文件，如万能属性
-[SIMPLIFY]
-简化
-[SIMPLIFY_HINT]
-删除没有使用的对象
+[REMOVE_UNUSED_OBJECT]
+移除未引用对象
+[REMOVE_UNUSED_OBJECT_HINT]
+
 [OPTIMIZE_JASS]
 优化脚本
 [OPTIMIZE_JASS_HINT]
@@ -63,7 +63,7 @@
 [CONFUSION]
 混淆脚本
 [CONFUSION_HINT]
-将变量名与函数名混淆为以下字符的组合
+重命名变量与函数
 [REPORT]
 详情
 [PROCESSING]

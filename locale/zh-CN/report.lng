@@ -14,8 +14,8 @@
 文本中的"}"被修改为了"|"
 [COMPUTED_TEXT_FAILED]
 公式计算失败
-[SIMPLIFY]
-简化
+[REMOVE_UNUSED_OBJECT]
+移除未引用对象
 [RETAIN_MARKET]
 保留市场物品
 [RETAIN_MARKET_HINT]
@@ -172,3 +172,15 @@
 未知的判断类型
 [UNEXPECT_CHUNK]
 未知的代码行类型
+[INPUT_PATH]
+输入路径：
+[OUTPUT_PATH]
+输出路径：
+[INPUT_FORMAT]
+输入格式：
+[OUTPUT_MODE]
+输出模式：
+[RESULT]
+结果：
+[TAKES_TIME]
+用时：%.3f 秒

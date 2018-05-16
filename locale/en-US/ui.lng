@@ -32,9 +32,9 @@ To Obj
 Read SLK
 [READ_SLK_HINT]
 Read imported SLK files
-[SIMPLIFY]
+[REMOVE_UNUSED_OBJECT]
 Remove unreferenced objects
-[SIMPLIFY_HINT]
+[REMOVE_UNUSED_OBJECT_HINT]
 
 [OPTIMIZE_JASS]
 Optimize JASS
@@ -63,7 +63,7 @@ Sometimes the search is slow
 [CONFUSION]
 Confuse scripts
 [CONFUSION_HINT]
-Use these characters
+Rename variables and functions
 [REPORT]
 Report
 [PROCESSING]

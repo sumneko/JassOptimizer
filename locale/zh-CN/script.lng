@@ -105,7 +105,9 @@ w3i里的文本长度超过1023字符
 [UNKNOWN_REASON]
 未知原因
 [NEED_WAR3_DIR]
-请使用魔兽目录
+请输入魔兽目录
+[LOAD_WAR3_LANG_FAILED]
+获取魔兽语言版本失败
 [EXPORT_FILE_FAILED]
 文件导出失败：
 [OPEN_FILE_FAILED]
@@ -143,6 +145,10 @@ w3i里的文本长度超过1023字符
 [TRIGGER_DATA_ERROR]
 触发器文件解析错误
 [OPEN_FAILED_MAYBE_W3X]
-文件 "%s" 不存在，也许你指的是 "%s.w3x"
+文件不存在，也许你指的是 "%s.w3x"
 [OPEN_FAILED_NO_EXISTS]
-文件 "%s" 不存在
+文件不存在
+[UNSUPPORTED_LNI_MARK]
+不支持的Lni地图
+[CONFIG_INVALID_DIR]
+%s.%s 指定的目录无效

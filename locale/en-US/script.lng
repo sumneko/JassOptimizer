@@ -105,7 +105,9 @@ Create map failed, maybe occupied
 [UNKNOWN_REASON]
 Unknown reason
 [NEED_WAR3_DIR]
-Need WarIII directory
+Need inputed WarIII directory
+[LOAD_WAR3_LANG_FAILED]
+Failed to load WC3 language
 [EXPORT_FILE_FAILED]
 Export file failed: 
 [OPEN_FILE_FAILED]
@@ -143,6 +145,10 @@ No trigger data directory was found
 [TRIGGER_DATA_ERROR]
 Trigger data error
 [OPEN_FAILED_MAYBE_W3X]
-"%s" dose not exsit, did you mean "%s.w3x" ?
+File dose not exsit, did you mean "%s.w3x" ?
 [OPEN_FAILED_NO_EXISTS]
-"%s" dose not exsit
+File dose not exsit
+[UNSUPPORTED_LNI_MARK]
+Unsupported Lni map
+[CONFIG_INVALID_DIR]
+Invalid dir specified by %s.%s
