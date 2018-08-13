@@ -19,12 +19,12 @@ local function main()
         local path = fs.path(arg[1])
         local jass = io.load(path)
 
-        local suc, ast, comments, errors = xpcall(parser.parse, debug.traceback, common, blizzard, jass)
+        local suc, ast, comments, errors, state = xpcall(parser.parse, debug.traceback, common, blizzard, jass)
 
         config = {}
         config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
 
-        local buf, report = optimizer(ast, config)
+        local buf, report = optimizer(ast, state, config)
         io.save(root / 'optimized.j', buf)
         for type, msgs in pairs(report) do
             for _, msg in ipairs(msgs) do
