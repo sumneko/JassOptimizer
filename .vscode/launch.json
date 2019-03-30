@@ -10,10 +10,12 @@
             "cwd": "${workspaceRoot}/bin",
             "path": "${workspaceRoot}/bin/?.lua",
             "cpath": "${workspaceRoot}/bin/?.dll;",
+            "luaRuntime": "5.4 32bit",
             "arg": [
                 "${workspaceRoot}/war3map.j"
             ],
-            "console": "ansi"
+            "consoleCoding": "utf8",
+            "sourceCoding": "utf8"
         },
     ]
 }

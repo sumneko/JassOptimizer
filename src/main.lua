@@ -19,17 +19,18 @@ local function main()
         local path = fs.path(arg[1])
         local jass = io.load(path)
 
-        local ast, grms
+        local option = {}
+        local ast
         local suc, e = xpcall(function()
-            ast, grms = parser(common,   'common.j',   ast)
-            ast, grms = parser(blizzard, 'blizzard.j', ast)
-            ast, grms = parser(jass,     'war3map.j',  ast)
+            ast = parser.parser(common,   'common.j',   option)
+            ast = parser.parser(blizzard, 'blizzard.j', option)
+            ast = parser.parser(jass,     'war3map.j',  option)
         end, debug.traceback)
 
         local config = {}
         config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
 
-        local buf, report = optimizer(ast, config)
+        local buf, report = optimizer(ast, option.state, config)
         io.save(root / 'optimized.j', buf)
         for type, msgs in pairs(report) do
             for _, msg in ipairs(msgs) do
