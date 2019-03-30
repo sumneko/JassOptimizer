@@ -29,6 +29,7 @@ local function main()
 
         local config = {}
         config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
+        config.confused = true
 
         local buf, report = optimizer(ast, option.state, config)
         io.save(root / 'optimized.j', buf)
