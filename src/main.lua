@@ -26,7 +26,7 @@ local function main()
             ast, grms = parser(jass,     'war3map.j',  ast)
         end, debug.traceback)
 
-        config = {}
+        local config = {}
         config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
 
         local buf, report = optimizer(ast, config)
