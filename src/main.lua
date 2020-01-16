@@ -45,7 +45,7 @@ local function main()
         option = {}
         parser.checker(common,   'common.j', option)
         parser.checker(blizzard, 'blizzard.j', option)
-        local errors = parser.checker(buf, 'optimized.j', option)
+        local errors = parser.checker(buf, 'war3map.j', option)
         if #errors > 0 then
             for _, error in ipairs(errors) do
                 if error.level == 'error' then
