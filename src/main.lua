@@ -9,6 +9,10 @@ require 'utility'
 local parser = require 'parser'
 local optimizer = require 'optimizer'
 
+local function format_error(info)
+    return ([[%s:%d:  %s]]):format(info.file, info.line, info.err)
+end
+
 local function main()
     if arg[1] then
         local exepath  = package.cpath:sub(1, package.cpath:find(';')-6)
@@ -26,6 +30,10 @@ local function main()
             ast = parser.parser(blizzard, 'blizzard.j', option)
             ast = parser.parser(jass,     'war3map.j',  option)
         end, debug.traceback)
+        if not suc then
+            print(e)
+            return
+        end
 
         local config = {}
         config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
@@ -33,6 +41,17 @@ local function main()
 
         local buf, report = optimizer(ast, option.state, config)
         io.save(root / 'optimized.j', buf)
+
+        local errors = parser.checker(buf, 'optimized.j', option)
+        if #errors > 0 then
+            for _, error in ipairs(errors) do
+                if error.level == 'error' then
+                    print(format_error(error))
+                end
+            end
+            return
+        end
+
         for type, msgs in pairs(report) do
             for _, msg in ipairs(msgs) do
                 print(type, msg[1], msg[2])
