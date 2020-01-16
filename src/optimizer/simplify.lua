@@ -438,7 +438,11 @@ return function (ast, _state, config, _report)
     jass = ast
     report = _report
     state = _state
-
+    -- TODO 现在还是有隐患，以后改为以下流程
+    -- 1. 先标记所有引用，并找出 TriggerRegisterVariableEvent 与 ExecuteFunc
+    -- 2. 遍历所有引用的全局变量，找出受 TriggerRegisterVariableEvent 影响而不能改变的名称，占用混淆名
+    -- 3. 遍历所有的函数，找出受 ExecuteFunc 影响而不能改变的名称，占用混淆名
+    -- 4. 遍历所有引用对象，设置混淆名
     init_confuser(config.confused, config.confusion)
     mark_function(get_function 'config')
     mark_function(get_function 'main')
