@@ -42,6 +42,9 @@ local function main()
         local buf, report = optimizer(ast, option.state, config)
         io.save(root / 'optimized.j', buf)
 
+        option = {}
+        parser.checker(common,   'common.j', option)
+        parser.checker(blizzard, 'blizzard.j', option)
         local errors = parser.checker(buf, 'optimized.j', option)
         if #errors > 0 then
             for _, error in ipairs(errors) do
