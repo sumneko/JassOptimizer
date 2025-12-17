@@ -45,11 +45,11 @@
     w2l obj "E:\Warcraft III\Maps\Test.w3x" "E:\Warcraft III\Maps\Test_obj.w3x"
 
 [HELP_CONFIG]
-查看和修过配置
+查看和修改配置
 [HELP_CONFIG_DESC]
 用法: w2l config              查看所有配置
       w2l config <配置>       查看指定配置
-      w2l config <配置>=<值>  修过指定配置
+      w2l config <配置>=<值>  修改指定配置
 
 例如：
     w2l config
@@ -92,43 +92,49 @@
 无效的语言，必须是以下值：
 
 
-[CONFIG_GLOBAL_WAR3]
-使用魔兽数据文件的目录，可以是以下值：
+[CONFIG_GLOBAL_DATA]
+使用数据文件的目录，可以是以下值：
 
 
-[CONFIG_GLOBAL_WAR3_ERROR]
+[CONFIG_GLOBAL_DATA_ERROR]
 无效的目录，必须是以下值：
 
 
-[CONFIG_GLOBAL_UI]
+[CONFIG_GLOBAL_DATA_UI]
 使用触发器数据的目录，可以是以下值：
 
-        ${YDWE}        搜索本地YDWE使用的触发器文件
+        ${DATA}           使用global.data的值
+        ${YDWE}           搜索本地YDWE使用的触发器文件
 
-[CONFIG_GLOBAL_UI_ERROR]
+[CONFIG_GLOBAL_DATA_UI_ERROR]
 无效的目录，必须是以下值：
 
-        ${YDWE}        搜索本地YDWE使用的触发器文件
+        ${DATA}           使用global.data的值
+        ${YDWE}           搜索本地YDWE使用的触发器文件
 
-[CONFIG_GLOBAL_META]
+[CONFIG_GLOBAL_DATA_META]
 使用编辑器数据的目录，可以使以下值：
 
+        ${DATA}           使用global.data的值
         ${DEFAULT}        使用正确的编辑器数据
 
-[CONFIG_GLOBAL_META_ERROR]
+[CONFIG_GLOBAL_DATA_META_ERROR]
 无效的目录，必须是以下值：
 
+        ${DATA}           使用global.data的值
         ${DEFAULT}        使用正确的编辑器数据
 
-[CONFIG_GLOBAL_WES]
+[CONFIG_GLOBAL_DATA_WES]
 使用编辑器文本的目录，可以使以下值：
 
-        ${YDWE}        使用YDWE的编辑器字符串
+        ${DATA}           使用global.data的值
+        ${DEFAULT}        使用默认的编辑器字符串
 
-[CONFIG_GLOBAL_WES_ERROR]
+[CONFIG_GLOBAL_DATA_WES_ERROR]
 无效的目录，必须是以下值：
 
-        ${YDWE}        使用YDWE的编辑器字符串
+        ${DATA}           使用global.data的值
+        ${DEFAULT}        使用默认的编辑器字符串
 
 [CONFIG_GLOBAL_PLUGIN]
 插件的目录。默认是`plugin`。
@@ -138,6 +144,8 @@
 输出目标是Lni时，限制搜索最优模板的次数，0表示无限。必须是整数。
 [CONFIG_LNI_EXPORT_LUA]
 输出目标是Lni时，导出地图内的lua文件。必须是布尔。
+[CONFIG_LNI_EXTRA_CHECK]
+输出目标是Lni时，检查地图数据的合理性。
 [CONFIG_SLK_REMOVE_UNUSE_OBJECT]
 输出目标是Slk时，移除没有引用的物体对象。必须是布尔。
 [CONFIG_SLK_OPTIMIZE_JASS]
@@ -149,7 +157,7 @@
 
 这将使WE与W3x2lni无法打开转换后的地图。
 [CONFIG_SLK_SLK_DOODAD]
-输出目标是Slk时，对装饰物进行Slk优化。必须是布尔。
+输出目标是Slk时，对装饰物与可破坏物进行Slk优化。必须是布尔。
 
 这可以使地形变化不再卡顿，但同时包含了潜在的风险：如果玩家没有重启魔兽就去玩另一张地图，那么他将看不到装饰物模型并且有可能掉线。
 [CONFIG_SLK_FIND_ID_TIMES]
@@ -162,10 +170,14 @@
     1.只能是字母数字下划线
     2.至少要有3个不同的字符
     3.至少要有2个字母
+[CONFIG_SLK_EXTRA_CHECK]
+输出目标是Slk时，检查地图数据的合理性。
 [CONFIG_OBJ_READ_SLK]
 输出目标是Obj时，转换地图内的slk文件。必须是布尔。
 [CONFIG_OBJ_FIND_ID_TIMES]
 输出目标是Obj时，限制搜索最优模板的次数，0表示无限。必须是整数。
+[CONFIG_OBJ_EXTRA_CHECK]
+输出目标是Obj时，检查地图数据的合理性。
 [CONFIG_MUST_BOOLEAN]
 必须是布尔
 [CONFIG_MUST_INTEGER]

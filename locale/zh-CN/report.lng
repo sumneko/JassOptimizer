@@ -143,9 +143,9 @@
 [TEMPLATE_NOT_EXISTED]
 底板不存在: %s [%s:%s]
 [ABILITY_REMOVED]
-技能被移除: %s
+魔兽无法识别技能: %s
 [ABILITY_REMOVED_HINT]
-自定义技能没有修改任何属性的话会被魔兽移除
+魔兽无法识别未修改的自定义技能
 [JASS_LINE]
 第[%d]行：
 [JASS_LINES]
@@ -184,3 +184,9 @@
 结果：
 [TAKES_TIME]
 用时：%.3f 秒
+[ERROR_ORDER_IN_ANcl]
+通魔 '%s' [%s] 无法使用
+[ERROR_ORDER_IN_Aspb]
+魔法书 '%s' [%s] 会被合并
+[ERROR_ORDER]
+基础命令ID '%s' 不存在

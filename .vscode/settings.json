@@ -4,5 +4,11 @@
     ],
     "Lua.diagnostics.disable": [
         "undefined-env-child"
-    ]
+    ],
+    "Lua.runtime.path": [
+        "bin/?.lua",
+        "src/?.lua",
+        "src/?/init.lua",
+    ],
+    "Lua.runtime.pathStrict": true
 }
