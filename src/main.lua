@@ -18,8 +18,8 @@ local function main()
     if arg[1] then
         local exepath  = package.cpath:sub(1, package.cpath:find(';')-6)
         local root     = fs.path(exepath):parent_path():parent_path()
-        local common   = io.load(root / 'src' / 'jass' / 'common.j')
-        local blizzard = io.load(root / 'src' / 'jass' / 'blizzard.j')
+        local common   = io.load(root / 'common.j') or io.load(root / 'src' / 'jass' / 'common.j')
+        local blizzard = io.load(root / 'blizzard.j') or io.load(root / 'src' / 'jass' / 'blizzard.j')
 
         local path = fs.path(arg[1])
         local jass = io.load(path)
