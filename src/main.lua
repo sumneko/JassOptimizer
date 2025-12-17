@@ -47,6 +47,7 @@ local function main()
         local buf, report = optimizer(ast, option.state, config)
         io.save(root / 'optimized.j', buf)
 
+        print('正在对优化后的代码进行语法检查，可能会和源代码的检查有重复的警告信息...')
         option = {}
         parser.checker(common,   'common.j', option)
         parser.checker(blizzard, 'blizzard.j', option)
