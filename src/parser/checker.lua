@@ -246,10 +246,6 @@ local static = {
     RETURN = {
         type = 'return',
     },
-    INTEGER = {
-        type = 'integer',
-        vtype = 'integer',
-    },
     REAL = {
         type = 'real',
         vtype = 'real',
@@ -259,6 +255,13 @@ local static = {
         vtype = 'string',
     },
 }
+
+local function Integer(neg, int)
+    if neg ~= '' then
+        int = - int
+    end
+    return Integers[int]
+end
 
 local function getOp(t1, t2)
     if (t1 == 'integer' or t1 == 'real') and (t2 == 'integer' or t2 == 'real') then
@@ -629,24 +632,33 @@ function parser.Real(str)
 end
 
 function parser.Integer8(neg, str)
-    return static.INTEGER
+    local int = tonumber(str, 8)
+    return Integer(neg, int)
 end
 
 function parser.Integer10(neg, str)
-    return static.INTEGER
+    local int = tointeger(str)
+    return Integer(neg, int)
 end
 
 function parser.Integer16(neg, str)
-    return static.INTEGER
+    local int = tointeger('0x'..str)
+    return Integer(neg, int)
 end
 
 function parser.Integer256(neg, str)
-    if #str == 4 then
+    local int
+    if #str == 1 then
+        int = stringByte(str)
+    elseif #str == 4 then
         if str:find('\\', 1, true) then
             parserError(lang.parser.ERROR_INT256_ESC)
         end
+        int = stringUnpack('>I4', str)
+    else
+        int = 0
     end
-    return static.INTEGER
+    return Integer(neg, int)
 end
 
 function parser.Code(name, pl)
@@ -945,7 +957,7 @@ function parser.ReturnExp(exp)
         local t1 = func.vtype
         local t2 = exp.vtype
         if t1 then
-            if t1 == 'real' and t2 == 'integer' then
+            if t1 == 'real' and t2 == 'integer' and exp.value ~= 0 then
                 parserWarning(lang.parser.ERROR_RETURN_INTEGER_AS_REAL:format(func.name, t1, t2) .. exploitText)
             elseif not isExtends(t2, t1) then
                 parserRB(lang.parser.ERROR_RETURN_TYPE:format(func.name, t1, t2) .. exploitText)

@@ -11,7 +11,7 @@ local parser = require 'parser'
 local optimizer = require 'optimizer'
 
 local function format_error(info)
-    return ([[%s:%d:  %s]]):format(info.file, info.line, info.err)
+    return ([[[%s]%s:%d:  %s]]):format(info.level, info.file, info.line, info.err)
 end
 
 local function main()
@@ -53,9 +53,7 @@ local function main()
         local errors = parser.checker(buf, 'war3map.j', option)
         if #errors > 0 then
             for _, error in ipairs(errors) do
-                if error.level == 'error' then
-                    print(format_error(error))
-                end
+                print(format_error(error))
             end
             return
         end
