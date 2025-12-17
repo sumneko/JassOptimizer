@@ -35,6 +35,10 @@ local function main()
             return
         end
 
+        for _, error in ipairs(option.errors or {}) do
+            print(format_error(error))
+        end
+
         local config = {}
         config.confusion = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_'
         config.confused = true
