@@ -260,6 +260,17 @@ local static = {
     },
 }
 
+local function Integer(neg, int, str, base)
+    if not int or int > 0x7fffffff or int < -0x80000000 then
+        -- 认为只有10进制数字才会犯整数边界的错误
+        if base == 10 then
+            int = 0
+            parserWarning(lang.parser.WARNING_INTEGER_OVERFLOW:format(str))
+        end
+    end
+    return static.INTEGER
+end
+
 local function getOp(t1, t2)
     if (t1 == 'integer' or t1 == 'real') and (t2 == 'integer' or t2 == 'real') then
         if t1 == 'real' or t2 == 'real' then
@@ -343,10 +354,16 @@ local function getCompare(t1, t2)
 end
 
 local function getAnd(t1, t2)
+    if t1 ~= 'boolean' or t2 ~= 'boolean' then
+        parserError(lang.parser.ERROR_AND:format(t1, t2))
+    end
     return 'boolean'
 end
 
 local function getOr(t1, t2)
+    if t1 ~= 'boolean' or t2 ~= 'boolean' then
+        parserError(lang.parser.ERROR_OR:format(t1, t2))
+    end
     return 'boolean'
 end
 
@@ -386,7 +403,10 @@ end
 local function getUnary(op, exp)
     local t = exp.vtype
     if op == 'not' then
-        return t
+        if t ~= 'boolean' then
+            parserError(lang.parser.ERROR_NOT_TYPE)
+        end
+        return 'boolean'
     end
 end
 
@@ -464,7 +484,7 @@ local function checkCall(func, call)
     end
 end
 
-local function checkSet(var, source, array, exp)
+local function checkSet(var, source, array, index, exp)
     -- 如果是马甲变量，就不再检查更多错误
     if source == 'dummy' then
         return
@@ -480,13 +500,21 @@ local function checkSet(var, source, array, exp)
             parserError(lang.parser.ERROR_NO_INDEX:format(name) .. exploitText)
         end
     end
-    if var.constant then
+    if index then
+        if not isExtends(index.vtype, 'integer') then
+            parserError(lang.parser.ERROR_INDEX_TYPE:format(name, index.vtype) .. exploitText)
+        end
+    end
+    if var.constant and state.currentFunction then
         parserError(lang.parser.ERROR_SET_CONSTANT:format(name))
     end
     if source == 'global' and state.currentFunction then
         if state.currentFunction.constant then
             parserError(lang.parser.ERROR_SET_IN_CONSTANT:format(name))
         end
+    end
+    if not exp.vtype then
+        parserError(lang.parser.ERROR_SET_TYPE:format(name, var.type, 'nothing') .. exploitText)
     end
     if not isExtends(exp.vtype, var.type) then
         parserError(lang.parser.ERROR_SET_TYPE:format(name, var.type, exp.vtype) .. exploitText)
@@ -629,15 +657,18 @@ function parser.Real(str)
 end
 
 function parser.Integer8(neg, str)
-    return static.INTEGER
+    local int = tonumber(str, 8)
+    return Integer(neg, int, str, 8)
 end
 
 function parser.Integer10(neg, str)
-    return static.INTEGER
+    local int = tointeger(str)
+    return Integer(neg, int, str, 10)
 end
 
 function parser.Integer16(neg, str)
-    return static.INTEGER
+    local int = tointeger('0x'..str)
+    return Integer(neg, int, str, 16)
 end
 
 function parser.Integer256(neg, str)
@@ -646,7 +677,7 @@ function parser.Integer256(neg, str)
             parserError(lang.parser.ERROR_INT256_ESC)
         end
     end
-    return static.INTEGER
+    return Integer(neg, 0, str, 256)
 end
 
 function parser.Code(name, pl)
@@ -817,6 +848,9 @@ function parser.Global(constant, type, array, name, exp)
         name = name,
         _set = true,
     }
+    if exp then
+        checkSet(global, 'global', array, nil, exp)
+    end
     globals[name] = global
     return global
 end
@@ -916,11 +950,11 @@ function parser.Set(name, ...)
     local var, source = getVar(name)
     if select('#', ...) == 1 then
         local exp = ...
-        checkSet(var, source, false, exp)
+        checkSet(var, source, false, nil, exp)
         var._set = true
     else
         local index, exp = ...
-        checkSet(var, source, true, exp)
+        checkSet(var, source, true, index, exp)
     end
 end
 
@@ -928,7 +962,7 @@ function parser.Return()
     local func = state.currentFunction
     if func then
         local t1 = func.vtype
-        if t1 then
+        if t1 ~= 'nothing' then
             parserError(lang.parser.ERROR_MISS_RETURN:format(func.name, t1))
         end
     end
@@ -944,7 +978,7 @@ function parser.ReturnExp(exp)
         end
         local t1 = func.vtype
         local t2 = exp.vtype
-        if t1 then
+        if t1 ~= 'nothing' then
             if t1 == 'real' and t2 == 'integer' then
                 parserWarning(lang.parser.ERROR_RETURN_INTEGER_AS_REAL:format(func.name, t1, t2) .. exploitText)
             elseif not isExtends(t2, t1) then
@@ -998,6 +1032,9 @@ function parser.IfStart()
 end
 
 function parser.If(file, line, condition, ...)
+    if condition.vtype ~= 'boolean' then
+        parserError(lang.parser.ERROR_CONDITION_TYPE)
+    end
     return {
         line = line,
     }
@@ -1010,6 +1047,12 @@ function parser.ElseifStart()
         state.returnMarks[stack] = false
     end
     return file, linecount
+end
+
+function parser.Elseif(file, line, condition, ...)
+    if condition.vtype ~= 'boolean' then
+        parserError(lang.parser.ERROR_CONDITION_TYPE)
+    end
 end
 
 function parser.ElseStart()
@@ -1129,7 +1172,7 @@ function parser.FunctionEnd(m)
         args[k] = nil
     end
     finishRB()
-    if func.returns and state.returnTimes[1] > 0 then
+    if func.returns ~= 'nothing' and state.returnTimes[1] > 0 then
         if state.returnAny then
             parserError(lang.parser.ERROR_RETURN_IN_ALL:format(func.name, func.returns))
         else
@@ -1185,6 +1228,7 @@ return function (jass_, file_, option_)
         state = {}
         option.state = state
         state.types = {
+            nothing = {type = 'type'},
             null    = {type = 'type'},
             handle  = {type = 'type'},
             code    = {type = 'type'},
