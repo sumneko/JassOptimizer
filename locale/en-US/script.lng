@@ -140,8 +140,6 @@ The extracted MPQ does not find the following WorldEditStrings
 No trigger data was read
 [NEED_YDWE_ASSOCIATE]
 Need to set the map to the associated YDWE
-[NO_TRIGGER_DATA_DIR]
-No trigger data directory was found
 [TRIGGER_DATA_ERROR]
 Trigger data error
 [OPEN_FAILED_MAYBE_W3X]
@@ -150,5 +148,11 @@ File dose not exsit, did you mean "%s.w3x" ?
 File dose not exsit
 [UNSUPPORTED_LNI_MARK]
 Unsupported Lni map
-[CONFIG_INVALID_DIR]
-Invalid dir specified by %s.%s
+[CONFIG_DIR_NO_EXISTS]
+Dir specified by %s.%s not exsits
+[CONFIG_DIR_VERSION_ERROR]
+Data version of %s.%s not matched
+[NO_LNI]
+No Lni dir
+[NEED_LIST_FILE]
+Need complete `(listfile)`

@@ -10,6 +10,10 @@
             "cwd": "${workspaceRoot}/bin",
             "path": "${workspaceRoot}/bin/?.lua",
             "cpath": "${workspaceRoot}/bin/?.dll;",
+            "luaVersion": "lua54",
+            "luaArch": "x86",
+            "console": "internalConsole",
+            "internalConsoleOptions": "openOnSessionStart",
             "arg": [
                 "${workspaceRoot}/war3map.j"
             ],

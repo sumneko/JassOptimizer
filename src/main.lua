@@ -6,6 +6,7 @@ end)()
 
 require 'filesystem'
 require 'utility'
+fs.current_path(fs.path(arg[0]):parent_path():parent_path())
 local parser = require 'parser'
 local optimizer = require 'optimizer'
 
@@ -34,10 +35,6 @@ local function main()
             print(e)
             return
         end
-
-        parser.checker(common,   'common.j', option)
-        parser.checker(blizzard, 'blizzard.j', option)
-        parser.checker(jass,     'war3map.j', option)
 
         for _, error in ipairs(option.errors or {}) do
             print(format_error(error))
