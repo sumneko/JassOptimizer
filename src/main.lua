@@ -35,6 +35,10 @@ local function main()
             return
         end
 
+        parser.checker(common,   'common.j', option)
+        parser.checker(blizzard, 'blizzard.j', option)
+        parser.checker(jass,     'war3map.j', option)
+
         for _, error in ipairs(option.errors or {}) do
             print(format_error(error))
         end
