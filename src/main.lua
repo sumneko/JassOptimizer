@@ -49,19 +49,16 @@ local function main()
 
         print('正在对优化后的代码进行语法检查，可能会和源代码的检查有重复的警告信息...')
         option = {}
-        parser.checker(common,   'common.j', option)
-        parser.checker(blizzard, 'blizzard.j', option)
-        local errors = parser.checker(buf, 'war3map.j', option)
-        if #errors > 0 then
-            for _, error in ipairs(errors) do
-                print(format_error(error))
-            end
-            return
+        parser.parser(common,   'common.j', option)
+        parser.parser(blizzard, 'blizzard.j', option)
+        parser.parser(buf, 'war3map.j', option)
+        for _, error in ipairs(option.errors or {}) do
+            print(format_error(error))
         end
 
         for type, msgs in pairs(report) do
             for _, msg in ipairs(msgs) do
-                print(type, msg[1], msg[2])
+                --print(type, msg[1], msg[2])
             end
         end
     else

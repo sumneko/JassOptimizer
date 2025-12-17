@@ -867,6 +867,7 @@ function parser.LocalDef(type, array, name)
     local gvar = state.exploit[name] or state.globals[name]
     if gvar then
         state.exploit[name] = loc
+        loc.exploited = true
         local reDef = {}
         if gvar.type ~= type then
             reDef[#reDef+1] = lang.parser.WARNING_REDEFINED_TO:format(type)
